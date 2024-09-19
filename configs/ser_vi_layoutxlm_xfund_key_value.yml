@@ -1,0 +1,72 @@
+Global:
+  use_gpu: False
+  epoch_num: &epoch_num 400
+  log_smooth_window: 10
+  print_batch_step: 10
+  save_model_dir: ./output/ser_vi_layoutxlm_key_value_20231030_all_data_2layer  #change here
+  save_epoch_step: 2000
+  # evaluation is run every 10 iterations after the 0th iteration
+  eval_batch_step: [ 0, 19 ]
+  cal_metric_during_train: False
+  save_inference_dir:
+  use_visualdl: False
+  seed: 2022
+  infer_img: train_data/4_class/final_qa/val/image/table_document_002.jpg
+  d2s_train_image_shape: [3, 224, 224]
+  # if you want to predict using the groundtruth ocr info,
+  # you can use the following config
+  # infer_img: train_data/XFUND/zh_val/val.json
+  infer_mode: False
+  image_folder: test_dataset/images/table_document_003.jpg
+  ocr_file: test_dataset/annotations/table_document_003.json
+  save_res_path: output/163_output #change here
+  kie_rec_model_dir: 
+  kie_det_model_dir:
+  amp_custom_white_list: ['scale', 'concat', 'elementwise_add']
+  visualize_output: True
+Architecture:
+  model_type: kie
+  algorithm: &algorithm "LayoutXLM"
+  Transform:
+  Backbone:
+    name: LayoutXLMForSer
+    pretrained: True
+    checkpoints: weights/paddle_ser_weight
+    # one of base or vi
+    mode: vi
+    num_classes: &num_classes 7
+
+PostProcess:
+  name: VQASerTokenLayoutLMPostProcess
+  class_path: &class_path configs/class_list_qa.txt #change here
+
+
+Eval:
+  dataset:
+    name: SimpleDataSet
+    transforms:
+      - DecodeImage: # load image
+          img_mode: RGB
+          channel_first: False
+      - VQATokenLabelEncode: # Class handling label
+          contains_re: False
+          algorithm: *algorithm
+          class_path: *class_path
+          use_textline_bbox_info: True
+          order_method: "tb-yx"
+      - VQATokenPad:
+          max_seq_len: 512
+          return_attention_mask: True
+      - VQASerTokenChunk:
+          max_seq_len: 512
+      - Resize:
+          size: [224,224]
+      - NormalizeImage:
+          scale: 1
+          mean: [ 123.675, 116.28, 103.53 ]
+          std: [ 58.395, 57.12, 57.375 ]
+          order: 'hwc'
+      - ToCHWImage:
+      - KeepKeys:
+          keep_keys: [ 'input_ids', 'bbox', 'attention_mask', 'token_type_ids', 'image', 'labels'] # dataloader will return list in this order
+

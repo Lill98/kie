@@ -1,0 +1,8 @@
+{
+    "gamma": 0.19881087859813396, 
+    "learning_rate": 0.09347045402346443, 
+    "max_depth": 7,
+    "n_estimators": 265,
+    "subsample": 0.8517055617133249, 
+    "eval_metric": "auc"
+}

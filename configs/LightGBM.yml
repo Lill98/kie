@@ -1,0 +1,8 @@
+label_path: dataset/20231027_re
+out_ser_path: /home/infordio-ai/quan/code/information_extraction/20231031_key-value評価データ/ser_res_20231031.txt
+params: params_best/params.json
+image_path: /home/infordio-ai/quan/code/information_extraction/20231031_key-value評価データ/image
+scaler_path: weights/20240103_lightgbm
+model_path: weights/20240103_lightgbm
+debug_dir: debugs
+aug_times: 5
